@@ -1,0 +1,14 @@
+diff --git a/controllers/video_jobs.go b/controllers/video_jobs.go
+--- a/controllers/video_jobs.go
++++ b/controllers/video_jobs.go
+@@ -142,6 +142,10 @@ func (m *VideoJobManager) markCompleted(jobID string, outputURL string, duration
+ 	m.mu.Lock()
+ 	defer m.mu.Unlock()
+ 	job, ok := m.jobs[jobID]
++	if !ok {
++		return fmt.Errorf("video job %s not found", jobID)
++	}
++	if job.Status == VideoJobFailed || job.Status == VideoJobCanceled {
++		return fmt.Errorf("cannot mark terminal video job %s (status=%s) as completed", jobID, job.Status)
++	}
+ 	job.Status = VideoJobCompleted
